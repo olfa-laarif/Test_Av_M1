@@ -99,7 +99,8 @@ describe ("CalculatePriceUseCase", ()=>{
     // 19. Test : amount absent → total inchangé grâce au ?? 0
     test("For one product with missing amount", async () => {
         // Given
-        givenReduction({ type: "PRICE_REDUCTION" });
+        const reduction: Reduction={ type: "PRICE_REDUCTION" };
+        givenReduction(reduction);
         const product: Product = { price: 100, name: "product1", quantity: 1 };
         // When
         const result = await calculatePrice.execute([product], "code10");
@@ -107,5 +108,16 @@ describe ("CalculatePriceUseCase", ()=>{
         expect(result).toBe(100); // total inchangé car amount ?? 0
     });
 
+    //20.Test échoue : l'offre "1 produit acheté = 1 offert" n'est pas encore appliquée
+    test("2 produits achetés = 1 offert", async () => {
+        // Given
+        const reduction: Reduction={ type: "PRODUIT" };
+        givenReduction(reduction);
+        const product: Product = { price: 100, name: "product1", quantity: 2 };
+        // When
+        const result = await calculatePrice.execute([product], "ONEFREEPULL");
+        // Then
+        expect(result).toBe(100);
+    });
 
 });
