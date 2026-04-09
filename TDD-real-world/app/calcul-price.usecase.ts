@@ -35,7 +35,7 @@ export function calculatePrice(products: Product[],  reductions: Reduction[] = [
     for (const reduction of reductions) {
         switch (reduction?.type) {
             case "PRICE_REDUCTION":
-                total -= reduction.amount ?? 0;
+                total = Math.max(total - (reduction.amount ?? 0), 1);
                 break;
             case "PERCENTAGE":
                 total -= total * ((reduction.amount ?? 0) / 100);

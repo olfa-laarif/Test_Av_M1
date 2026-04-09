@@ -152,7 +152,8 @@ describe ("CalculatePriceUseCase", ()=>{
         expect(result).toBe(300);
     });
 
-    // 26. Test échoue : réduction ne descend pas sous 1€
+    // 26. Test échoue : réduction descend sous 1€
+    //27. Test passe : réduction ne descend pas sous 1€
     test("For reduction cannot go below 1€", async () => {
         // Given
         givenReduction("EURO30", { type: "PRICE_REDUCTION", amount: 30 });
