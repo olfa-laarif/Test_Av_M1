@@ -136,7 +136,8 @@ describe ("CalculatePriceUseCase", ()=>{
         // 100 - 10 = 90 → 90 - 10% = 81
         expect(result).toBe(81);
     });
-// 22. Test échoue : ONE_FOR_ONE uniquement sur les PULL
+    // 24. Test échoue : ONE_FOR_ONE uniquement sur les PULL
+    //25. test passe
     test("2 pulls achetés = 1 offert uniquement sur PULL", async () => {
         // Given
         givenReduction("ONEFREEPULL", { type: "PRODUIT", applicableTo: "PULL" });

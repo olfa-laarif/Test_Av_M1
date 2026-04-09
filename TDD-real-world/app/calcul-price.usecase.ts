@@ -10,6 +10,7 @@ export type Product = {
 export type Reduction = {
     type: string;
     amount?: number;
+    applicableTo?: ProductsType;
 
 };
 
@@ -41,8 +42,10 @@ export function calculatePrice(products: Product[],  reductions: Reduction[] = [
                 break;
             case "PRODUIT":
                 for (const product of products) {
-                    const freeQty = Math.floor(product.quantity / 2);
-                    total -= freeQty * product.price;
+                    if (!reduction.applicableTo || product.type === reduction.applicableTo) {
+                        const freeQty = Math.floor(product.quantity / 2);
+                        total -= freeQty * product.price;
+                    }
                 }
                 break;
         }
