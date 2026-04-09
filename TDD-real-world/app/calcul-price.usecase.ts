@@ -51,9 +51,9 @@ interface ReductionGateway {
 }
 
 export class StubReductionGateway implements ReductionGateway {
-    public reduction!: Reduction;
+    public reductions: Record<string, Reduction> = {};
 
     getReductionByCode(code: string): Promise<Reduction> {
-        return Promise.resolve(this.reduction);
+        return Promise.resolve(this.reductions[code]);
     }
 }

@@ -10,8 +10,8 @@ describe ("CalculatePriceUseCase", ()=>{
         calculatePrice = new CalculatePriceUseCase(reductionGateway);
     });
 
-    function givenReduction(reduction: Reduction) {
-        reductionGateway.reduction = reduction;
+    function givenReduction(code: string, reduction: Reduction) {
+        reductionGateway.reductions[code] = reduction;
     }
 
     test("firstTest",()=>{
@@ -64,7 +64,7 @@ describe ("CalculatePriceUseCase", ()=>{
     test("For one production with price reduction", async () => {
         // Given
         const reduction: Reduction = { type: "PRICE_REDUCTION", amount: 10 }
-        givenReduction(reduction);
+        givenReduction("code10",reduction);
         const product: Product = { price: 100, name: "product1", quantity: 1 }
         // When
         const result = await calculatePrice.execute([product], "code10");
@@ -76,7 +76,7 @@ describe ("CalculatePriceUseCase", ()=>{
     test("For one product with percentage reduction", async () => {
         // Given
         const reduction: Reduction =  { type: "PERCENTAGE", amount: 20 };
-        givenReduction(reduction);
+        givenReduction("PERCENT20",reduction);
         const product: Product = { price: 120, name: "product1", quantity: 1 }
         // When
         const result = await calculatePrice.execute([product], "PERCENT20");
@@ -88,7 +88,7 @@ describe ("CalculatePriceUseCase", ()=>{
     test("For one product with unknown reduction type", async () => {
         // Given
         const reduction: Reduction={ type: "UNKNOWN", amount: 10 };
-        givenReduction(reduction);
+        givenReduction("UNKNOWN",reduction);
         const product: Product = { price: 100, name: "product1", quantity: 1 };
         // When
         const result = await calculatePrice.execute([product], "UNKNOWN");
@@ -100,7 +100,7 @@ describe ("CalculatePriceUseCase", ()=>{
     test("For one product with missing amount", async () => {
         // Given
         const reduction: Reduction={ type: "PRICE_REDUCTION" };
-        givenReduction(reduction);
+        givenReduction("code10",reduction);
         const product: Product = { price: 100, name: "product1", quantity: 1 };
         // When
         const result = await calculatePrice.execute([product], "code10");
@@ -113,12 +113,27 @@ describe ("CalculatePriceUseCase", ()=>{
     test("2 produits achetés = 1 offert", async () => {
         // Given
         const reduction: Reduction={ type: "PRODUIT" };
-        givenReduction(reduction);
+        givenReduction("ONEFREEPULL",reduction);
         const product: Product = { price: 100, name: "product1", quantity: 2 };
         // When
         const result = await calculatePrice.execute([product], "ONEFREEPULL");
         // Then
         expect(result).toBe(100);
+    });
+
+    // 22. Test échoue : execute() n'accepte pas plusieurs codes promo
+    test("For one product with multiple promo codes", async () => {
+        // Given
+        reductionGateway.reductions = {
+            "code10": { type: "PRICE_REDUCTION", amount: 10 },
+            "PERCENT10": { type: "PERCENTAGE", amount: 10 },
+        };
+        const product: Product = { price: 100, name: "product1", quantity: 1 };
+        // When
+        const result = await calculatePrice.execute([product], ["code10", "PERCENT10"]);
+        // Then
+        // 100 - 10 = 90 → 90 - 10% = 81
+        expect(result).toBe(81);
     });
 
 });
