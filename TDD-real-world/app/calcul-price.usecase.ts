@@ -14,6 +14,19 @@ export type Reduction = {
 
 };
 
+// Implémentation minimale : ajout du ReductionGateway et d'un Stub pour simuler les réductions
+interface ReductionGateway {
+    getReductionByCode(code: string): Promise<Reduction>;
+}
+
+export class StubReductionGateway implements ReductionGateway {
+    public reductions: Record<string, Reduction> = {};
+
+    getReductionByCode(code: string): Promise<Reduction> {
+        return Promise.resolve(this.reductions[code]);
+    }
+}
+
 export class CalculatePriceUseCase {
     constructor(private reductionGateway: ReductionGateway) {}
 
@@ -82,15 +95,3 @@ function isBlackFridayPeriod(date: Date) {
 }
 
 
-// Implémentation minimale : ajout du ReductionGateway et d'un Stub pour simuler les réductions
-interface ReductionGateway {
-    getReductionByCode(code: string): Promise<Reduction>;
-}
-
-export class StubReductionGateway implements ReductionGateway {
-    public reductions: Record<string, Reduction> = {};
-
-    getReductionByCode(code: string): Promise<Reduction> {
-        return Promise.resolve(this.reductions[code]);
-    }
-}

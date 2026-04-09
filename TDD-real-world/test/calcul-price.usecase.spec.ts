@@ -191,4 +191,21 @@ describe ("CalculatePriceUseCase", ()=>{
         vi.useRealTimers();
     });
 
+    // 32. Test échoue : ordre d'application des réductions non respecté
+    test("For reductions are applied in the correct order", async () => {
+        // Given — PRODUIT → PRICE_REDUCTION → BLACKFRIDAY
+        givenReduction("ONEFREEPULL", { type: "PRODUIT", applicableTo: "PULL" });
+        givenReduction("EURO10", { type: "PRICE_REDUCTION", amount: 10 });
+        givenReduction("BLACKFRIDAY", { type: "BLACKFRIDAY" });
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date("2025-11-28T12:00:00"));
+        const product: Product = { price: 100, name: "pull", quantity: 2, type: "PULL" };
+        // When — ordre inversé intentionnellement
+        const result = await calculatePrice.execute([product], ["BLACKFRIDAY", "EURO10", "ONEFREEPULL"]);
+        // Then
+        // PRODUIT → 100 → PRICE_REDUCTION → 90 → BLACKFRIDAY 50% → 45
+        expect(result).toBe(45);
+        vi.useRealTimers();
+    });
+
 });
