@@ -12,34 +12,36 @@ export type Reduction = {
 export class CalculatePriceUseCase {
     constructor(private reductionGateway: ReductionGateway) {}
 
-    async execute(products:Product[],code?:string) {
+    async execute(products:Product[],codes: string[] = []) {
 
         let total = products.reduce((sum, product) => sum + product.price * product.quantity , 0);
-        if (!code) return  calculatePrice(products);
-        const reduction = await this.reductionGateway.getReductionByCode(code);
-        return calculatePrice(products, reduction);
+        const reductions = await Promise.all(
+            codes.map(code => this.reductionGateway.getReductionByCode(code))
+        );
+        return calculatePrice(products, reductions);
         //Retourne le prix total des produits
         return total;
     }
 }
 
 // Fonction calculatePrice
-export function calculatePrice(products: Product[], reduction?: Reduction): number {
+export function calculatePrice(products: Product[],  reductions: Reduction[] = []): number {
     let total = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
-
-    switch (reduction?.type) {
-        case "PRICE_REDUCTION":
-            total -= reduction.amount ?? 0;
-            break;
-        case "PERCENTAGE":
-            total -= total * ((reduction.amount ?? 0) / 100);
-            break;
-        case "PRODUIT":
-            for (const product of products) {
-                const freeQty = Math.floor(product.quantity / 2);
-                total -= freeQty * product.price;
-            }
-            break;
+    for (const reduction of reductions) {
+        switch (reduction?.type) {
+            case "PRICE_REDUCTION":
+                total -= reduction.amount ?? 0;
+                break;
+            case "PERCENTAGE":
+                total -= total * ((reduction.amount ?? 0) / 100);
+                break;
+            case "PRODUIT":
+                for (const product of products) {
+                    const freeQty = Math.floor(product.quantity / 2);
+                    total -= freeQty * product.price;
+                }
+                break;
+        }
     }
 
     return total;

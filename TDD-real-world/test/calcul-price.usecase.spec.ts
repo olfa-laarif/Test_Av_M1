@@ -67,7 +67,7 @@ describe ("CalculatePriceUseCase", ()=>{
         givenReduction("code10",reduction);
         const product: Product = { price: 100, name: "product1", quantity: 1 }
         // When
-        const result = await calculatePrice.execute([product], "code10");
+        const result = await calculatePrice.execute([product],  ["code10"]);
         // Then
         expect(result).toBe(90);
     });
@@ -79,7 +79,7 @@ describe ("CalculatePriceUseCase", ()=>{
         givenReduction("PERCENT20",reduction);
         const product: Product = { price: 120, name: "product1", quantity: 1 }
         // When
-        const result = await calculatePrice.execute([product], "PERCENT20");
+        const result = await calculatePrice.execute([product], ["PERCENT20"]);
         // Then
         expect(result).toBe(96);
     });
@@ -91,7 +91,7 @@ describe ("CalculatePriceUseCase", ()=>{
         givenReduction("UNKNOWN",reduction);
         const product: Product = { price: 100, name: "product1", quantity: 1 };
         // When
-        const result = await calculatePrice.execute([product], "UNKNOWN");
+        const result = await calculatePrice.execute([product], ["UNKNOWN"]);
         // Then
         expect(result).toBe(100); // total inchangé
     });
@@ -103,7 +103,7 @@ describe ("CalculatePriceUseCase", ()=>{
         givenReduction("code10",reduction);
         const product: Product = { price: 100, name: "product1", quantity: 1 };
         // When
-        const result = await calculatePrice.execute([product], "code10");
+        const result = await calculatePrice.execute([product], ["code10"]);
         // Then
         expect(result).toBe(100); // total inchangé car amount ?? 0
     });
@@ -116,12 +116,13 @@ describe ("CalculatePriceUseCase", ()=>{
         givenReduction("ONEFREEPULL",reduction);
         const product: Product = { price: 100, name: "product1", quantity: 2 };
         // When
-        const result = await calculatePrice.execute([product], "ONEFREEPULL");
+        const result = await calculatePrice.execute([product], ["ONEFREEPULL"]);
         // Then
         expect(result).toBe(100);
     });
 
     // 22. Test échoue : execute() n'accepte pas plusieurs codes promo
+    //23. test passe
     test("For one product with multiple promo codes", async () => {
         // Given
         reductionGateway.reductions = {
