@@ -7,11 +7,13 @@ export type Product = {
 };
 
 class CalculatePriceUseCase {
-    execute(products:Product[]) {
+
+    execute(products:Product[],code?:string) {
         //Retourne le prix total des produits
         return products.reduce((sum, product) => sum + product.price * product.quantity , 0);
     }
 }
+
 
 describe ("CalculatePriceUseCase", ()=>{
     //4.deplacer le calculatePrice
@@ -58,6 +60,16 @@ describe ("CalculatePriceUseCase", ()=>{
         ];
         expect(calculatePrice.execute(products)
         ).toBe(300);
+    });
+
+    // Test échoue : la réduction n'est pas encore appliquée
+    test("For one production with price reduction", () => {
+        // Given
+        const product: Product = { price: 100, name: "product1", quantity: 1 }
+        // When
+        const result = calculatePrice.execute([product], "code10");
+        // Then
+        expect(result).toBe(90);
     });
 
 });
