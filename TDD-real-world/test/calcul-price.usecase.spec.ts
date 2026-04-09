@@ -109,6 +109,7 @@ describe ("CalculatePriceUseCase", ()=>{
     });
 
     //20.Test échoue : l'offre "1 produit acheté = 1 offert" n'est pas encore appliquée
+    //21. test passe: l'offre est appliquée
     test("2 produits achetés = 1 offert", async () => {
         // Given
         const reduction: Reduction={ type: "PRODUIT" };
