@@ -72,9 +72,10 @@ describe ("CalculatePriceUseCase", ()=>{
         expect(result).toBe(90);
     });
     //16.Test échoue : la réduction en pourcentage n'est pas encore appliquée
+    //17.test passe: la réduction est appliquée
     test("For one product with percentage reduction", async () => {
         // Given
-        const reduction: Reduction =  { type: "pourcentage", amount: 20 };
+        const reduction: Reduction =  { type: "PERCENTAGE", amount: 20 };
         givenReduction(reduction);
         const product: Product = { price: 120, name: "product1", quantity: 1 }
         // When

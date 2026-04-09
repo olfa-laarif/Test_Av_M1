@@ -18,9 +18,14 @@ export class CalculatePriceUseCase {
         if (!code) return total;
         const reduction = await this.reductionGateway.getReductionByCode(code);
 
-        //
-        total -= reduction.amount;
-
+        switch (reduction.type) {
+            case "PRICE_REDUCTION":
+                total -= reduction.amount?? 0;
+                break;
+            case "PERCENTAGE":
+                total -= total * ((reduction.amount?? 0) / 100);
+                break;
+        }
         //Retourne le prix total des produits
         return total;
     }
