@@ -45,7 +45,17 @@ export class CalculatePriceUseCase {
 // Fonction calculatePrice
 export function calculatePrice(products: Product[],  reductions: Reduction[] = []): number {
     let total = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
-    for (const reduction of reductions) {
+    const order: Record<string, number> = {
+        PRODUIT: 0,
+        PRICE_REDUCTION: 1,
+        PERCENTAGE: 1,
+        BLACKFRIDAY: 2
+    };
+
+    const sorted = [...reductions].sort((a, b) =>
+        (order[a.type] ?? 0) - (order[b.type] ?? 0)
+    );
+    for (const reduction of sorted) {
         switch (reduction?.type) {
             case "PRICE_REDUCTION":
                 total = Math.max(total - (reduction.amount ?? 0), 1);

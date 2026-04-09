@@ -192,6 +192,7 @@ describe ("CalculatePriceUseCase", ()=>{
     });
 
     // 32. Test échoue : ordre d'application des réductions non respecté
+    //33. test passe
     test("For reductions are applied in the correct order", async () => {
         // Given — PRODUIT → PRICE_REDUCTION → BLACKFRIDAY
         givenReduction("ONEFREEPULL", { type: "PRODUIT", applicableTo: "PULL" });
