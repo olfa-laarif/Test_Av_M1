@@ -49,10 +49,7 @@ export function calculatePrice(products: Product[],  reductions: Reduction[] = [
                 }
                 break;
             case "BLACKFRIDAY": {
-                const now = new Date();
-                const start = new Date("2025-11-28T00:00:00");
-                const end   = new Date("2025-11-30T23:59:59");
-                if (now >= start && now <= end) {
+                if (isBlackFridayPeriod(new Date())) {
                     total = Math.max(total * 0.5, 1);
                 }
                 break;
@@ -62,6 +59,28 @@ export function calculatePrice(products: Product[],  reductions: Reduction[] = [
 
     return Math.max(total, 0);
 }
+
+function getBlackFridayPeriod(): { start: Date; end: Date } {
+    const year = new Date().getFullYear();
+    // Black Friday = 4ème vendredi de novembre
+    const november = new Date(year, 10, 1); // 1er novembre
+    const firstDayOfWeek = november.getDay(); // 0=dimanche, 5=vendredi
+    const firstFriday = firstDayOfWeek <= 5
+        ? 5 - firstDayOfWeek + 1
+        : 7 - firstDayOfWeek + 6;
+    const blackFriday = firstFriday + 21; // 4ème vendredi
+
+    const start = new Date(year, 10, blackFriday, 0, 0, 0);
+    const end   = new Date(year, 10, blackFriday + 3, 23, 59, 59); // lundi
+
+    return { start, end };
+}
+
+function isBlackFridayPeriod(date: Date) {
+    const { start, end } = getBlackFridayPeriod();
+    return date >= start && date <= end;
+}
+
 
 // Implémentation minimale : ajout du ReductionGateway et d'un Stub pour simuler les réductions
 interface ReductionGateway {
