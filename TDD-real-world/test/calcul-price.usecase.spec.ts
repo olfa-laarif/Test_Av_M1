@@ -164,4 +164,15 @@ describe ("CalculatePriceUseCase", ()=>{
         expect(result).toBe(1); // 5 - 30 = -25 → plancher à 1€
     });
 
+    // 28. Test échoue : le total descend sous 0
+    test("total should never go below 0", async () => {
+        // Given
+        givenReduction("PERCENT200", { type: "PERCENTAGE", amount: 200 });
+        const product: Product = { price: 100, name: "product1", quantity: 1, type: "TSHIRT" };
+        // When
+        const result = await calculatePrice.execute([product], ["PERCENT200"]);
+        // Then
+        expect(result).toBe(0); // 100 - 200% → plancher à 0
+    });
+
 });
