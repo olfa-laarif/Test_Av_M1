@@ -6,4 +6,7 @@ describe ("CalculatePriceUseCase", ()=>{
         expect(true).toBeTruthy;
     });
 
+
+
+
 });
