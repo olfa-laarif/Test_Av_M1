@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from "vitest";
-import {CalculatePriceUseCase, Product, StubReductionGateway} from "@/calcul-price.usecase";
+import {CalculatePriceUseCase, Product, Reduction, StubReductionGateway} from "@/calcul-price.usecase";
 
 describe ("CalculatePriceUseCase", ()=>{
     //4.deplacer le calculatePrice
@@ -10,7 +10,7 @@ describe ("CalculatePriceUseCase", ()=>{
         calculatePrice = new CalculatePriceUseCase(reductionGateway);
     });
 
-    function givenReduction(reduction: { type: string; amount: number }) {
+    function givenReduction(reduction: Reduction) {
         reductionGateway.reduction = reduction;
     }
 
@@ -60,14 +60,28 @@ describe ("CalculatePriceUseCase", ()=>{
     // 12.Test échoue : la réduction n'est pas encore appliquée
     //13.ajout du ReductionGateway et d'un Stub pour simuler les réductions
     //14.test passe: la réduction est appliquée
+    //15. Refactor : extraction de givenReduction() et déplacement dans calcul-price.usecase.ts
     test("For one production with price reduction", async () => {
         // Given
-        givenReduction({ type: "PRICE_REDUCTION", amount: 10 });
+        const reduction: Reduction = { type: "PRICE_REDUCTION", amount: 10 }
+        givenReduction(reduction);
         const product: Product = { price: 100, name: "product1", quantity: 1 }
         // When
         const result = await calculatePrice.execute([product], "code10");
         // Then
         expect(result).toBe(90);
     });
+    //16.Test échoue : la réduction en pourcentage n'est pas encore appliquée
+    test("For one product with percentage reduction", async () => {
+        // Given
+        const reduction: Reduction =  { type: "pourcentage", amount: 20 };
+        givenReduction(reduction);
+        const product: Product = { price: 120, name: "product1", quantity: 1 }
+        // When
+        const result = await calculatePrice.execute([product], "PERCENT20");
+        // Then
+        expect(result).toBe(96);
+    });
+
 
 });
