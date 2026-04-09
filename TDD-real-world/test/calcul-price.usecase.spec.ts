@@ -11,9 +11,11 @@ class CalculatePriceUseCase {
 
     async execute(products:Product[],code?:string) {
 
-        const reduction = await this.reductionGateway.getReductionByCode(code!!);
+        let total = products.reduce((sum, product) => sum + product.price * product.quantity , 0);
+        if (!code) return total;
+        const reduction = await this.reductionGateway.getReductionByCode(code);
         //Retourne le prix total des produits
-        return products.reduce((sum, product) => sum + product.price * product.quantity , 0);
+        return total;
     }
 }
 // Implémentation minimale : ajout du ReductionGateway et d'un Stub pour simuler les réductions
