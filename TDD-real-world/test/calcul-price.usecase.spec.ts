@@ -152,4 +152,15 @@ describe ("CalculatePriceUseCase", ()=>{
         expect(result).toBe(300);
     });
 
+    // 26. Test échoue : réduction ne descend pas sous 1€
+    test("For reduction cannot go below 1€", async () => {
+        // Given
+        givenReduction("EURO30", { type: "PRICE_REDUCTION", amount: 30 });
+        const product: Product = { price: 5, name: "product1", quantity: 1, type: "TSHIRT" };
+        // When
+        const result = await calculatePrice.execute([product], ["EURO30"]);
+        // Then
+        expect(result).toBe(1); // 5 - 30 = -25 → plancher à 1€
+    });
+
 });
