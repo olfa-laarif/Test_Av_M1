@@ -1,5 +1,11 @@
 import { describe, test, expect, beforeEach } from "vitest";
 
+class CalculatePriceUseCase {
+    execute(param: any[]) {
+        return 0;
+    }
+}
+
 describe ("CalculatePriceUseCase", ()=>{
 
 
@@ -10,6 +16,7 @@ describe ("CalculatePriceUseCase", ()=>{
 
 
     //test failed ReferenceError: CalculatePriceUseCase is not defined
+    //test pass CalculatePriceUseCase > For CalculatePriceUseCase
     test("For CalculatePriceUseCase", () => {
         let calculatePrice= new CalculatePriceUseCase();
         expect(calculatePrice.execute([])).toBe(0);
