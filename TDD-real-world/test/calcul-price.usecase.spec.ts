@@ -38,4 +38,10 @@ describe ("CalculatePriceUseCase", ()=>{
         ).toBe(200);
     });
 
+    //10.test failed with error syntaxe quantity does not exist in type { price: number; name: string;}
+    test("For two products with quantity", () => {
+        expect(calculatePrice.execute([{price: 100, name: "product1",quantity: 1,},{price: 100, name: "product2",quantity: 2}])
+        ).toBe(300);
+    });
+
 });
