@@ -84,5 +84,28 @@ describe ("CalculatePriceUseCase", ()=>{
         expect(result).toBe(96);
     });
 
+    // 18. Test : type de réduction inconnu → total inchangé
+    test("For one product with unknown reduction type", async () => {
+        // Given
+        const reduction: Reduction={ type: "UNKNOWN", amount: 10 };
+        givenReduction(reduction);
+        const product: Product = { price: 100, name: "product1", quantity: 1 };
+        // When
+        const result = await calculatePrice.execute([product], "UNKNOWN");
+        // Then
+        expect(result).toBe(100); // total inchangé
+    });
+
+    // 19. Test : amount absent → total inchangé grâce au ?? 0
+    test("For one product with missing amount", async () => {
+        // Given
+        givenReduction({ type: "PRICE_REDUCTION" });
+        const product: Product = { price: 100, name: "product1", quantity: 1 };
+        // When
+        const result = await calculatePrice.execute([product], "code10");
+        // Then
+        expect(result).toBe(100); // total inchangé car amount ?? 0
+    });
+
 
 });

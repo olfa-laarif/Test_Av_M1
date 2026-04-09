@@ -6,7 +6,7 @@ export type Product = {
 
 export type Reduction = {
     type: string;
-    amount: number;
+    amount?: number;
 };
 
 export class CalculatePriceUseCase {
