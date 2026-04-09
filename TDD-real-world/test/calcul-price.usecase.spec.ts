@@ -165,6 +165,7 @@ describe ("CalculatePriceUseCase", ()=>{
     });
 
     // 28. Test échoue : le total descend sous 0
+    //29. test passe: le total ne descend jamais sous 0
     test("total should never go below 0", async () => {
         // Given
         givenReduction("PERCENT200", { type: "PERCENTAGE", amount: 200 });

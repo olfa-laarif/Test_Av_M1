@@ -51,7 +51,7 @@ export function calculatePrice(products: Product[],  reductions: Reduction[] = [
         }
     }
 
-    return total;
+    return Math.max(total, 0);
 }
 
 // Implémentation minimale : ajout du ReductionGateway et d'un Stub pour simuler les réductions
