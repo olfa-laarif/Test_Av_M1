@@ -14,6 +14,9 @@ class CalculatePriceUseCase {
         let total = products.reduce((sum, product) => sum + product.price * product.quantity , 0);
         if (!code) return total;
         const reduction = await this.reductionGateway.getReductionByCode(code);
+
+        total -= reduction.amount;
+
         //Retourne le prix total des produits
         return total;
     }
@@ -85,7 +88,9 @@ describe ("CalculatePriceUseCase", ()=>{
         ).toBe(300);
     });
 
-    // Test échoue : la réduction n'est pas encore appliquée
+    // 12.Test échoue : la réduction n'est pas encore appliquée
+    //13.ajout du ReductionGateway et d'un Stub pour simuler les réductions
+    //14.test passe: la réduction est appliquée
     test("For one production with price reduction", async () => {
         // Given
         reductionGateway.reduction = {
