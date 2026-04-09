@@ -37,6 +37,7 @@ class StubReductionGateway implements ReductionGateway {
     }
 }
 
+
 describe ("CalculatePriceUseCase", ()=>{
     //4.deplacer le calculatePrice
     let reductionGateway: StubReductionGateway;
@@ -45,6 +46,11 @@ describe ("CalculatePriceUseCase", ()=>{
         reductionGateway = new StubReductionGateway();
         calculatePrice = new CalculatePriceUseCase(reductionGateway);
     });
+
+    function givenReduction(reduction: { type: string; amount: number }) {
+        reductionGateway.reduction = reduction;
+    }
+
     test("firstTest",()=>{
         expect(true).toBeTruthy();
     });
@@ -93,10 +99,7 @@ describe ("CalculatePriceUseCase", ()=>{
     //14.test passe: la réduction est appliquée
     test("For one production with price reduction", async () => {
         // Given
-        reductionGateway.reduction = {
-            type: "PRICE_REDUCTION",
-            amount: 10,
-        };
+        givenReduction({ type: "PRICE_REDUCTION", amount: 10 });
         const product: Product = { price: 100, name: "product1", quantity: 1 }
         // When
         const result = await calculatePrice.execute([product], "code10");
