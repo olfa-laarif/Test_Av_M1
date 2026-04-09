@@ -1,42 +1,5 @@
 import { describe, test, expect, beforeEach } from "vitest";
-
-export type Product = {
-    name: string;
-    quantity: number;
-    price: number;
-};
-
-class CalculatePriceUseCase {
-    constructor(private reductionGateway: ReductionGateway) {}
-
-    async execute(products:Product[],code?:string) {
-
-        let total = products.reduce((sum, product) => sum + product.price * product.quantity , 0);
-        if (!code) return total;
-        const reduction = await this.reductionGateway.getReductionByCode(code);
-
-        total -= reduction.amount;
-
-        //Retourne le prix total des produits
-        return total;
-    }
-}
-// Implémentation minimale : ajout du ReductionGateway et d'un Stub pour simuler les réductions
-interface ReductionGateway {
-    getReductionByCode(code: string): Promise<{ type: string; amount: number }>;
-}
-
-class StubReductionGateway implements ReductionGateway {
-    public reduction;
-
-    getReductionByCode(code: string): Promise<{
-        type: string;
-        amount: number;
-    }> {
-        return Promise.resolve(this.reduction);
-    }
-}
-
+import {CalculatePriceUseCase, Product, StubReductionGateway} from "@/calcul-price.usecase";
 
 describe ("CalculatePriceUseCase", ()=>{
     //4.deplacer le calculatePrice
