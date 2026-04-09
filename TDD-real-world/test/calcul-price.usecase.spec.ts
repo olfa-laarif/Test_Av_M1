@@ -7,18 +7,39 @@ export type Product = {
 };
 
 class CalculatePriceUseCase {
+    constructor(private reductionGateway: ReductionGateway) {}
 
-    execute(products:Product[],code?:string) {
+    async execute(products:Product[],code?:string) {
+
+        const reduction = await this.reductionGateway.getReductionByCode(code!!);
         //Retourne le prix total des produits
         return products.reduce((sum, product) => sum + product.price * product.quantity , 0);
     }
 }
+// Implémentation minimale : ajout du ReductionGateway et d'un Stub pour simuler les réductions
+interface ReductionGateway {
+    getReductionByCode(code: string): Promise<{ type: string; amount: number }>;
+}
 
+class StubReductionGateway implements ReductionGateway {
+    public reduction;
+
+    getReductionByCode(code: string): Promise<{
+        type: string;
+        amount: number;
+    }> {
+        return Promise.resolve(this.reduction);
+    }
+}
 
 describe ("CalculatePriceUseCase", ()=>{
     //4.deplacer le calculatePrice
-    let calculatePrice= new CalculatePriceUseCase();
-    // Premier test
+    let reductionGateway: StubReductionGateway;
+    let calculatePrice: CalculatePriceUseCase;
+    beforeEach(() => {
+        reductionGateway = new StubReductionGateway();
+        calculatePrice = new CalculatePriceUseCase(reductionGateway);
+    });
     test("firstTest",()=>{
         expect(true).toBeTruthy();
     });
@@ -65,6 +86,10 @@ describe ("CalculatePriceUseCase", ()=>{
     // Test échoue : la réduction n'est pas encore appliquée
     test("For one production with price reduction", () => {
         // Given
+        reductionGateway.reduction = {
+            type: "PRICE_REDUCTION",
+            amount: 10,
+        };
         const product: Product = { price: 100, name: "product1", quantity: 1 }
         // When
         const result = calculatePrice.execute([product], "code10");
