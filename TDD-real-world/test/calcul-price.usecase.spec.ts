@@ -177,6 +177,7 @@ describe ("CalculatePriceUseCase", ()=>{
     });
 
     // 30. Test échoue : BLACKFRIDAY non implémenté
+    //31.test passe
     test("For 50% off during Black Friday weekend", async () => {
         // Given
         vi.useFakeTimers();

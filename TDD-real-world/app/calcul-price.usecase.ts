@@ -48,6 +48,15 @@ export function calculatePrice(products: Product[],  reductions: Reduction[] = [
                     }
                 }
                 break;
+            case "BLACKFRIDAY": {
+                const now = new Date();
+                const start = new Date("2025-11-28T00:00:00");
+                const end   = new Date("2025-11-30T23:59:59");
+                if (now >= start && now <= end) {
+                    total = Math.max(total * 0.5, 1);
+                }
+                break;
+            }
         }
     }
 
