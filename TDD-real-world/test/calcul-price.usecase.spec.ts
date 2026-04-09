@@ -2,7 +2,8 @@ import { describe, test, expect, beforeEach } from "vitest";
 
 class CalculatePriceUseCase {
     execute(products:{ price: number; name: string }[]) {
-        return products[0].price;
+        //return total price of products
+        return products.reduce((sum, product) => sum + product.price, 0);
     }
 }
 
@@ -31,6 +32,7 @@ describe ("CalculatePriceUseCase", ()=>{
 
     //7.test failed CalculatePriceUseCase > For two products :expected undefined to be 200
     //8. modification de la signature de execute() pour accepter un tableau de produits
+    //9. test pass
     test("For two products", () => {
         expect(calculatePrice.execute([{price: 100, name: "product1"},{price: 100, name: "product2"}])
         ).toBe(200);
