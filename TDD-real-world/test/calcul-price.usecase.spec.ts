@@ -21,7 +21,7 @@ describe ("CalculatePriceUseCase", ()=>{
     //1. Test échoue : ReferenceError CalculatePriceUseCase non définie
     //2.Test passe
     test("For CalculatePriceUseCase", async () => {
-        const product: Product = { price: 1, name: "product1", quantity: 1 }
+        const product: Product = { price: 1, name: "product1", quantity: 1,type: "TSHIRT" }
         expect(await calculatePrice.execute([product])).toBe(1);
     });
 
@@ -29,7 +29,7 @@ describe ("CalculatePriceUseCase", ()=>{
     //5. Test passe avec erreur de la syntaxe (Expected 0 arguments, but got 1
     //6 test passe: Implémentation minimale : retourner le prix du produit
     test("For one product", async () => {
-        const product: Product = { price: 100, name: "product1", quantity: 1 }
+        const product: Product = { price: 100, name: "product1", quantity: 1 ,type: "TSHIRT"}
         expect(await calculatePrice.execute([product])
         ).toBe(100);
     });
@@ -39,8 +39,8 @@ describe ("CalculatePriceUseCase", ()=>{
     //9. test passe
     test("For two products", async () => {
         const products: Product[] = [
-            { price: 100, name: "product1", quantity: 1 },
-            { price: 100, name: "product2", quantity: 1 },
+            { price: 100, name: "product1", quantity: 1,type: "TSHIRT" },
+            { price: 100, name: "product2", quantity: 1,type: "TSHIRT" },
         ];
         expect(await calculatePrice.execute(products)
         ).toBe(200);
@@ -50,8 +50,8 @@ describe ("CalculatePriceUseCase", ()=>{
     //11.Test passe : ajout de quantity dans le Product et Mise à jour du calcul pour prendre en compte la quantité
     test("For two products with quantity", async () => {
         const products: Product[] = [
-            { price: 100, name: "product1", quantity: 1 },
-            { price: 100, name: "product2", quantity: 2 },
+            { price: 100, name: "product1", quantity: 1 ,type: "TSHIRT"},
+            { price: 100, name: "product2", quantity: 2,type: "TSHIRT" },
         ];
         expect(await calculatePrice.execute(products)
         ).toBe(300);
@@ -65,7 +65,7 @@ describe ("CalculatePriceUseCase", ()=>{
         // Given
         const reduction: Reduction = { type: "PRICE_REDUCTION", amount: 10 }
         givenReduction("code10",reduction);
-        const product: Product = { price: 100, name: "product1", quantity: 1 }
+        const product: Product = { price: 100, name: "product1", quantity: 1,type: "TSHIRT" }
         // When
         const result = await calculatePrice.execute([product],  ["code10"]);
         // Then
@@ -77,7 +77,7 @@ describe ("CalculatePriceUseCase", ()=>{
         // Given
         const reduction: Reduction =  { type: "PERCENTAGE", amount: 20 };
         givenReduction("PERCENT20",reduction);
-        const product: Product = { price: 120, name: "product1", quantity: 1 }
+        const product: Product = { price: 120, name: "product1", quantity: 1,type: "TSHIRT" }
         // When
         const result = await calculatePrice.execute([product], ["PERCENT20"]);
         // Then
@@ -89,7 +89,7 @@ describe ("CalculatePriceUseCase", ()=>{
         // Given
         const reduction: Reduction={ type: "UNKNOWN", amount: 10 };
         givenReduction("UNKNOWN",reduction);
-        const product: Product = { price: 100, name: "product1", quantity: 1 };
+        const product: Product = { price: 100, name: "product1", quantity: 1 ,type: "TSHIRT"};
         // When
         const result = await calculatePrice.execute([product], ["UNKNOWN"]);
         // Then
@@ -101,7 +101,7 @@ describe ("CalculatePriceUseCase", ()=>{
         // Given
         const reduction: Reduction={ type: "PRICE_REDUCTION" };
         givenReduction("code10",reduction);
-        const product: Product = { price: 100, name: "product1", quantity: 1 };
+        const product: Product = { price: 100, name: "product1", quantity: 1 ,type: "TSHIRT"};
         // When
         const result = await calculatePrice.execute([product], ["code10"]);
         // Then
@@ -114,7 +114,7 @@ describe ("CalculatePriceUseCase", ()=>{
         // Given
         const reduction: Reduction={ type: "PRODUIT" };
         givenReduction("ONEFREEPULL",reduction);
-        const product: Product = { price: 100, name: "product1", quantity: 2 };
+        const product: Product = { price: 100, name: "product1", quantity: 2 ,type: "TSHIRT"};
         // When
         const result = await calculatePrice.execute([product], ["ONEFREEPULL"]);
         // Then
@@ -129,12 +129,26 @@ describe ("CalculatePriceUseCase", ()=>{
             "code10": { type: "PRICE_REDUCTION", amount: 10 },
             "PERCENT10": { type: "PERCENTAGE", amount: 10 },
         };
-        const product: Product = { price: 100, name: "product1", quantity: 1 };
+        const product: Product = { price: 100, name: "product1", quantity: 1,type: "TSHIRT" };
         // When
         const result = await calculatePrice.execute([product], ["code10", "PERCENT10"]);
         // Then
         // 100 - 10 = 90 → 90 - 10% = 81
         expect(result).toBe(81);
+    });
+// 22. Test échoue : ONE_FOR_ONE uniquement sur les PULL
+    test("2 pulls achetés = 1 offert uniquement sur PULL", async () => {
+        // Given
+        givenReduction("ONEFREEPULL", { type: "PRODUIT", applicableTo: "PULL" });
+        const products: Product[] = [
+            { price: 100, name: "pull", quantity: 2, type: "PULL" },
+            { price: 100, name: "tshirt", quantity: 2, type: "TSHIRT" },
+        ];
+        // When
+        const result = await calculatePrice.execute(products, ["ONEFREEPULL"]);
+        // Then
+        // pull: 1 offert → 100, tshirt: aucune réduction → 200 = 300
+        expect(result).toBe(300);
     });
 
 });

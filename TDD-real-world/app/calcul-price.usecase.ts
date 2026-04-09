@@ -1,12 +1,16 @@
+export type ProductsType = "TSHIRT" | "PULL";
+
 export type Product = {
     name: string;
     quantity: number;
     price: number;
+    type: ProductsType;
 };
 
 export type Reduction = {
     type: string;
     amount?: number;
+
 };
 
 export class CalculatePriceUseCase {
