@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from "vitest";
+import { describe, test, expect, beforeEach,vi } from "vitest";
 import {CalculatePriceUseCase, Product, Reduction, StubReductionGateway} from "@/calcul-price.usecase";
 
 describe ("CalculatePriceUseCase", ()=>{
@@ -166,7 +166,7 @@ describe ("CalculatePriceUseCase", ()=>{
 
     // 28. Test échoue : le total descend sous 0
     //29. test passe: le total ne descend jamais sous 0
-    test("total should never go below 0", async () => {
+    test("For total should never go below 0", async () => {
         // Given
         givenReduction("PERCENT200", { type: "PERCENTAGE", amount: 200 });
         const product: Product = { price: 100, name: "product1", quantity: 1, type: "TSHIRT" };
@@ -174,6 +174,20 @@ describe ("CalculatePriceUseCase", ()=>{
         const result = await calculatePrice.execute([product], ["PERCENT200"]);
         // Then
         expect(result).toBe(0); // 100 - 200% → plancher à 0
+    });
+
+    // 30. Test échoue : BLACKFRIDAY non implémenté
+    test("For 50% off during Black Friday weekend", async () => {
+        // Given
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date("2025-11-28T12:00:00"));
+        givenReduction("BLACKFRIDAY", { type: "BLACKFRIDAY" });
+        const product: Product = { price: 100, name: "product1", quantity: 1, type: "TSHIRT" };
+        // When
+        const result = await calculatePrice.execute([product], ["BLACKFRIDAY"]);
+        // Then
+        expect(result).toBe(50);
+        vi.useRealTimers();
     });
 
 });
