@@ -28,15 +28,11 @@ export class StubReductionGateway implements ReductionGateway {
     }
 }
 
+//ajout du DateProvider et StubDateProvider
 export interface DateProvider {
     now(): Date;
 }
 
-export class SystemDateProvider implements DateProvider {
-    now(): Date {
-        return new Date();
-    }
-}
 
 export class StubDateProvider implements DateProvider {
     private currentDate: Date = new Date();
@@ -50,8 +46,20 @@ export class StubDateProvider implements DateProvider {
     }
 }
 
+export interface NotificationService {
+    notifyFinalPrice(price: number): Promise<void>;
+}
+
+// SpyNotificationService — on vérifie QUE la notification est envoyée
+export class SpyNotificationService implements NotificationService {
+    public notifiedPrice: number | null = null;
+    async notifyFinalPrice(price: number): Promise<void> {
+        this.notifiedPrice = price;
+    }
+}
+
 export class CalculatePriceUseCase {
-    constructor(private reductionGateway: ReductionGateway,private dateProvider: DateProvider) {}
+    constructor(private reductionGateway: ReductionGateway,private dateProvider: DateProvider,private notificationService: NotificationService,) {}
 
     async execute(products:Product[],codes: string[] = []) {
 
@@ -59,9 +67,10 @@ export class CalculatePriceUseCase {
         const reductions = await Promise.all(
             codes.map(code => this.reductionGateway.getReductionByCode(code))
         );
-        return calculatePrice(products, reductions,this.dateProvider.now());
-        //Retourne le prix total des produits
+        total =  calculatePrice(products, reductions,this.dateProvider.now());
+        await this.notificationService.notifyFinalPrice(total);
         return total;
+
     }
 }
 

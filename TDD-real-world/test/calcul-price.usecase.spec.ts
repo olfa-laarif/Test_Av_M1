@@ -1,8 +1,8 @@
-import { describe, test, expect, beforeEach,vi,afterEach } from "vitest";
+import { describe, test, expect, beforeEach } from "vitest";
 import {
-    CalculatePriceUseCase, DateProvider,
+    CalculatePriceUseCase,
     Product,
-    Reduction,
+    Reduction, SpyNotificationService,
     StubDateProvider,
     StubReductionGateway
 } from "@/calcul-price.usecase";
@@ -12,10 +12,12 @@ describe ("CalculatePriceUseCase", ()=>{
     let reductionGateway: StubReductionGateway;
     let dateProvider: StubDateProvider;
     let calculatePrice: CalculatePriceUseCase;
+    let spyNotificationService: SpyNotificationService;
     beforeEach(() => {
         reductionGateway = new StubReductionGateway();
         dateProvider = new StubDateProvider();
-        calculatePrice = new CalculatePriceUseCase(reductionGateway,dateProvider);
+        spyNotificationService = new SpyNotificationService();
+        calculatePrice = new CalculatePriceUseCase(reductionGateway,dateProvider, spyNotificationService);
     });
     function givenReduction(code: string, reduction: Reduction) {
         reductionGateway.reductions[code] = reduction;
@@ -249,5 +251,25 @@ describe ("CalculatePriceUseCase", ()=>{
         expect(result).toBe(90); // 100 > 30 → réduction appliquée
     });
 
+    // 40. Test échoue : notification non implémentée
+    //42. test passe: notification du client avec le prix final après calcul
+    test("notify client with final price after calculation", async () => {
+        // Given
+        givenReduction("code10", { type: "PRICE_REDUCTION", amount: 10 });
+        const product: Product = { price: 100, name: "product1", quantity: 1, type: "TSHIRT" };
+        // When
+        await calculatePrice.execute([product], ["code10"]);
+        // Then
+        expect(spyNotificationService.notifiedPrice).toBe(90);
+    });
 
+// 41. Test : notification envoyée même sans code promo
+    test("notify client even without promo code", async () => {
+        // Given
+        const product: Product = { price: 100, name: "product1", quantity: 1, type: "TSHIRT" };
+        // When
+        await calculatePrice.execute([product]);
+        // Then
+        expect(spyNotificationService.notifiedPrice).toBe(100);
+    });
 });
