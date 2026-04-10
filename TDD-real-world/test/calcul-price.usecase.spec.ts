@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach,vi } from "vitest";
+import { describe, test, expect, beforeEach,vi,afterEach } from "vitest";
 import {CalculatePriceUseCase, Product, Reduction, StubReductionGateway} from "@/calcul-price.usecase";
 
 describe ("CalculatePriceUseCase", ()=>{
@@ -8,6 +8,9 @@ describe ("CalculatePriceUseCase", ()=>{
     beforeEach(() => {
         reductionGateway = new StubReductionGateway();
         calculatePrice = new CalculatePriceUseCase(reductionGateway);
+    });
+    afterEach(() => {
+        vi.useRealTimers();
     });
 
     function givenReduction(code: string, reduction: Reduction) {
@@ -188,7 +191,6 @@ describe ("CalculatePriceUseCase", ()=>{
         const result = await calculatePrice.execute([product], ["BLACKFRIDAY"]);
         // Then
         expect(result).toBe(50);
-        vi.useRealTimers();
     });
 
     // 32. Test échoue : ordre d'application des réductions non respecté
@@ -206,7 +208,6 @@ describe ("CalculatePriceUseCase", ()=>{
         // Then
         // PRODUIT → 100 → PRICE_REDUCTION → 90 → BLACKFRIDAY 50% → 45
         expect(result).toBe(45);
-        vi.useRealTimers();
     });
 
 });
