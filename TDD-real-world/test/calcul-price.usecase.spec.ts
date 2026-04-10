@@ -1,18 +1,22 @@
 import { describe, test, expect, beforeEach,vi,afterEach } from "vitest";
-import {CalculatePriceUseCase, Product, Reduction, StubReductionGateway} from "@/calcul-price.usecase";
+import {
+    CalculatePriceUseCase, DateProvider,
+    Product,
+    Reduction,
+    StubDateProvider,
+    StubReductionGateway
+} from "@/calcul-price.usecase";
 
 describe ("CalculatePriceUseCase", ()=>{
     //4.deplacer le calculatePrice
     let reductionGateway: StubReductionGateway;
+    let dateProvider: StubDateProvider;
     let calculatePrice: CalculatePriceUseCase;
     beforeEach(() => {
         reductionGateway = new StubReductionGateway();
-        calculatePrice = new CalculatePriceUseCase(reductionGateway);
+        dateProvider = new StubDateProvider();
+        calculatePrice = new CalculatePriceUseCase(reductionGateway,dateProvider);
     });
-    afterEach(() => {
-        vi.useRealTimers();
-    });
-
     function givenReduction(code: string, reduction: Reduction) {
         reductionGateway.reductions[code] = reduction;
     }
@@ -183,8 +187,7 @@ describe ("CalculatePriceUseCase", ()=>{
     //31.test passe
     test("For 50% off during Black Friday weekend", async () => {
         // Given
-        vi.useFakeTimers();
-        vi.setSystemTime(new Date("2025-11-28T12:00:00"));
+        dateProvider.setDate(new Date("2025-11-28T12:00:00"));
         givenReduction("BLACKFRIDAY", { type: "BLACKFRIDAY" });
         const product: Product = { price: 100, name: "product1", quantity: 1, type: "TSHIRT" };
         // When
@@ -200,14 +203,26 @@ describe ("CalculatePriceUseCase", ()=>{
         givenReduction("ONEFREEPULL", { type: "PRODUIT", applicableTo: "PULL" });
         givenReduction("EURO10", { type: "PRICE_REDUCTION", amount: 10 });
         givenReduction("BLACKFRIDAY", { type: "BLACKFRIDAY" });
-        vi.useFakeTimers();
-        vi.setSystemTime(new Date("2025-11-28T12:00:00"));
+        dateProvider.setDate(new Date("2025-11-28T12:00:00"));
         const product: Product = { price: 100, name: "pull", quantity: 2, type: "PULL" };
         // When — ordre inversé intentionnellement
         const result = await calculatePrice.execute([product], ["BLACKFRIDAY", "EURO10", "ONEFREEPULL"]);
         // Then
         // PRODUIT → 100 → PRICE_REDUCTION → 90 → BLACKFRIDAY 50% → 45
         expect(result).toBe(45);
+    });
+    //34.Test echoue :vi.setSystemTime(new Date("2025-12-01T00:00:00")) donne 2025-11-30T23:00:00.000Z en UTC
+    //35.test passe pour vi.setSystemTime(new Date("2025-12-02T00:00:00"))
+    //36. refactor
+    test("For Black Friday inactive outside the period", async () => {
+        // Given
+        dateProvider.setDate(new Date("2025-12-02T00:00:00"));
+        givenReduction("BLACKFRIDAY", { type: "BLACKFRIDAY" });
+        const product: Product = { price: 100, name: "product1", quantity: 1, type: "TSHIRT" };
+        // When
+        const result = await calculatePrice.execute([product], ["BLACKFRIDAY"]);
+        // Then
+        expect(result).toBe(100);
     });
 
 });

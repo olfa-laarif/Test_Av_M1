@@ -27,8 +27,30 @@ export class StubReductionGateway implements ReductionGateway {
     }
 }
 
+export interface DateProvider {
+    now(): Date;
+}
+
+export class SystemDateProvider implements DateProvider {
+    now(): Date {
+        return new Date();
+    }
+}
+
+export class StubDateProvider implements DateProvider {
+    private currentDate: Date = new Date();
+
+    setDate(date: Date) {
+        this.currentDate = date;
+    }
+
+    now(): Date {
+        return this.currentDate;
+    }
+}
+
 export class CalculatePriceUseCase {
-    constructor(private reductionGateway: ReductionGateway) {}
+    constructor(private reductionGateway: ReductionGateway,private dateProvider: DateProvider) {}
 
     async execute(products:Product[],codes: string[] = []) {
 
@@ -36,14 +58,14 @@ export class CalculatePriceUseCase {
         const reductions = await Promise.all(
             codes.map(code => this.reductionGateway.getReductionByCode(code))
         );
-        return calculatePrice(products, reductions);
+        return calculatePrice(products, reductions,this.dateProvider.now());
         //Retourne le prix total des produits
         return total;
     }
 }
 
 // Fonction calculatePrice
-export function calculatePrice(products: Product[],  reductions: Reduction[] = []): number {
+export function calculatePrice(products: Product[],  reductions: Reduction[] = [], currentDate: Date): number {
     let total = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
     const order: Record<string, number> = {
         PRODUIT: 0,
@@ -72,7 +94,9 @@ export function calculatePrice(products: Product[],  reductions: Reduction[] = [
                 }
                 break;
             case "BLACKFRIDAY": {
-                if (isBlackFridayPeriod(new Date())) {
+                console.log(isBlackFridayPeriod(currentDate));
+                console.log(currentDate);
+                if (isBlackFridayPeriod(currentDate)) {
                     total = Math.max(total * 0.5, 1);
                 }
                 break;
@@ -83,24 +107,25 @@ export function calculatePrice(products: Product[],  reductions: Reduction[] = [
     return Math.max(total, 0);
 }
 
-function getBlackFridayPeriod(): { start: Date; end: Date } {
-    const year = new Date().getFullYear();
-    // Black Friday = 4ème vendredi de novembre
-    const november = new Date(year, 10, 1); // 1er novembre
-    const firstDayOfWeek = november.getDay(); // 0=dimanche, 5=vendredi
-    const firstFriday = firstDayOfWeek <= 5
-        ? 5 - firstDayOfWeek + 1
-        : 7 - firstDayOfWeek + 6;
-    const blackFriday = firstFriday + 21; // 4ème vendredi
+function getBlackFridayPeriod(date: Date): { start: Date; end: Date } {
+    const year = date.getFullYear();
+
+    const november = new Date(year, 10, 1);
+    const day = november.getDay();
+
+    const diff = (5 - day + 7) % 7;
+    const firstFriday = 1 + diff;
+
+    const blackFriday = firstFriday + 21;
 
     const start = new Date(year, 10, blackFriday, 0, 0, 0);
-    const end   = new Date(year, 10, blackFriday + 3, 23, 59, 59); // lundi
+    const end   = new Date(year, 10, blackFriday + 3, 23, 59, 59);
 
     return { start, end };
 }
 
 function isBlackFridayPeriod(date: Date) {
-    const { start, end } = getBlackFridayPeriod();
+    const { start, end } = getBlackFridayPeriod(date);
     return date >= start && date <= end;
 }
 
