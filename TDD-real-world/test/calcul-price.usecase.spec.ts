@@ -226,6 +226,7 @@ describe ("CalculatePriceUseCase", ()=>{
     });
 
     // 37. Test échoue : réduction conditionnelle si commande dépasse x€
+    //39.test passe
     test("For percentage reduction only if order exceeds minimum amount", async () => {
         // Given
         givenReduction("PERCENT10", { type: "PERCENTAGE", amount: 10, minAmount: 30 });
@@ -237,7 +238,7 @@ describe ("CalculatePriceUseCase", ()=>{
     });
 
 
-// 37. Test : réduction appliquée si commande dépasse le minimum
+// 38. Test : réduction appliquée si commande dépasse le minimum
     test("For percentage reduction applied if order exceeds minimum amount", async () => {
         // Given
         givenReduction("PERCENT10", { type: "PERCENTAGE", amount: 10, minAmount: 30 });

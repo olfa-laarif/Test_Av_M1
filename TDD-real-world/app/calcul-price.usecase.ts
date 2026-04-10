@@ -11,6 +11,7 @@ export type Reduction = {
     type: string;
     amount?: number;
     applicableTo?: ProductsType;
+    minAmount?: number;
 
 };
 
@@ -78,6 +79,7 @@ export function calculatePrice(products: Product[],  reductions: Reduction[] = [
         (order[a.type] ?? 0) - (order[b.type] ?? 0)
     );
     for (const reduction of sorted) {
+        if (reduction.minAmount && total < reduction.minAmount) continue;
         switch (reduction?.type) {
             case "PRICE_REDUCTION":
                 total = Math.max(total - (reduction.amount ?? 0), 1);
