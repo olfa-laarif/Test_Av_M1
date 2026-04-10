@@ -225,4 +225,28 @@ describe ("CalculatePriceUseCase", ()=>{
         expect(result).toBe(100);
     });
 
+    // 37. Test échoue : réduction conditionnelle si commande dépasse x€
+    test("For percentage reduction only if order exceeds minimum amount", async () => {
+        // Given
+        givenReduction("PERCENT10", { type: "PERCENTAGE", amount: 10, minAmount: 30 });
+        const product: Product = { price: 20, name: "product1", quantity: 1, type: "TSHIRT" };
+        // When
+        const result = await calculatePrice.execute([product], ["PERCENT10"]);
+        // Then
+        expect(result).toBe(20); // 20 < 30 → pas de réduction
+    });
+
+
+// 37. Test : réduction appliquée si commande dépasse le minimum
+    test("For percentage reduction applied if order exceeds minimum amount", async () => {
+        // Given
+        givenReduction("PERCENT10", { type: "PERCENTAGE", amount: 10, minAmount: 30 });
+        const product: Product = { price: 100, name: "product1", quantity: 1, type: "TSHIRT" };
+        // When
+        const result = await calculatePrice.execute([product], ["PERCENT10"]);
+        // Then
+        expect(result).toBe(90); // 100 > 30 → réduction appliquée
+    });
+
+
 });

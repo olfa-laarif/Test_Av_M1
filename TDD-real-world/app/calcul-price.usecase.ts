@@ -94,8 +94,6 @@ export function calculatePrice(products: Product[],  reductions: Reduction[] = [
                 }
                 break;
             case "BLACKFRIDAY": {
-                console.log(isBlackFridayPeriod(currentDate));
-                console.log(currentDate);
                 if (isBlackFridayPeriod(currentDate)) {
                     total = Math.max(total * 0.5, 1);
                 }
