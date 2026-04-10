@@ -16,7 +16,7 @@ export type Reduction = {
 };
 
 // Implémentation minimale : ajout du ReductionGateway et d'un Stub pour simuler les réductions
-interface ReductionGateway {
+export interface ReductionGateway {
     getReductionByCode(code: string): Promise<Reduction>;
 }
 
@@ -63,11 +63,10 @@ export class CalculatePriceUseCase {
 
     async execute(products:Product[],codes: string[] = []) {
 
-        let total = products.reduce((sum, product) => sum + product.price * product.quantity , 0);
         const reductions = await Promise.all(
             codes.map(code => this.reductionGateway.getReductionByCode(code))
         );
-        total =  calculatePrice(products, reductions,this.dateProvider.now());
+        const total =  calculatePrice(products, reductions,this.dateProvider.now());
         await this.notificationService.notifyFinalPrice(total);
         return total;
 
@@ -89,7 +88,7 @@ export function calculatePrice(products: Product[],  reductions: Reduction[] = [
     );
     for (const reduction of sorted) {
         if (reduction.minAmount && total < reduction.minAmount) continue;
-        switch (reduction?.type) {
+        switch (reduction.type) {
             case "PRICE_REDUCTION":
                 total = Math.max(total - (reduction.amount ?? 0), 1);
                 break;
